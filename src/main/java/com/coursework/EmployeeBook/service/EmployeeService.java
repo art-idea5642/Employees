@@ -45,8 +45,6 @@ public class EmployeeService {
         return employeeMap;
     }
 
-    // Методы для работы с отделами
-
     public Employee getEmployeeWithMaxSalary(String departmentId) {
         return employeeMap.values().stream()
                 .filter(e -> e.getDepartmentId().equals(departmentId))

@@ -33,7 +33,6 @@ public class EmployeeController {
         if (departmentId != null) {
             return employeeService.getAllEmployeesByDepartment(departmentId);
         } else {
-            // Если departmentId не указан, возвращаем всех сотрудников, разделённых по отделам
             Map<String, List<Employee>> employeesByDepartment = employeeService.getAllEmployeesGroupedByDepartment();
             return employeesByDepartment.values().stream()
                     .flatMap(List::stream)
