@@ -5,18 +5,16 @@ import com.coursework.EmployeeBook.exceptions.EmployeeAlreadyAddedException;
 import com.coursework.EmployeeBook.exceptions.EmployeeNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class EmployeeService {
     private final Map<String, Employee> employeeMap = new HashMap<>();
 
-
     private String generateKey(Employee employee) {
         return employee.getFirstName() + " " + employee.getSurname();
     }
-
 
     public void addEmployee(Employee employee) {
         String key = generateKey(employee);
@@ -26,7 +24,6 @@ public class EmployeeService {
         employeeMap.put(key, employee);
     }
 
-
     public void removeEmployee(String name, String surname) {
         String key = name + " " + surname;
         if (!employeeMap.containsKey(key)) {
@@ -34,7 +31,6 @@ public class EmployeeService {
         }
         employeeMap.remove(key);
     }
-
 
     public Employee findEmployee(String name, String surname) {
         String key = name + " " + surname;
@@ -44,8 +40,37 @@ public class EmployeeService {
         }
         return employee;
     }
+
     public Map<String, Employee> getAllEmployees() {
         return employeeMap;
     }
+
+    // Методы для работы с отделами
+
+    public Employee getEmployeeWithMaxSalary(String departmentId) {
+        return employeeMap.values().stream()
+                .filter(e -> e.getDepartmentId().equals(departmentId))
+                .max(Comparator.comparingDouble(Employee::getSalary))
+                .orElseThrow(() -> new EmployeeNotFoundException("В отделе с таким ID нет сотрудников."));
+    }
+
+    public Employee getEmployeeWithMinSalary(String departmentId) {
+        return employeeMap.values().stream()
+                .filter(e -> e.getDepartmentId().equals(departmentId))
+                .min(Comparator.comparingDouble(Employee::getSalary))
+                .orElseThrow(() -> new EmployeeNotFoundException("В отделе с таким ID нет сотрудников."));
+    }
+
+    public List<Employee> getAllEmployeesByDepartment(String departmentId) {
+        return employeeMap.values().stream()
+                .filter(e -> e.getDepartmentId().equals(departmentId))
+                .collect(Collectors.toList());
+    }
+
+    public Map<String, List<Employee>> getAllEmployeesGroupedByDepartment() {
+        return employeeMap.values().stream()
+                .collect(Collectors.groupingBy(Employee::getDepartmentId));
+    }
 }
+
 

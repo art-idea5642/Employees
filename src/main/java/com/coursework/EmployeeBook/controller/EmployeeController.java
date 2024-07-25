@@ -2,60 +2,45 @@ package com.coursework.EmployeeBook.controller;
 
 import com.coursework.EmployeeBook.dto.Employee;
 import com.coursework.EmployeeBook.service.EmployeeService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import com.coursework.EmployeeBook.exceptions.EmployeeNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/employees")
+@RequestMapping("/departments")
 public class EmployeeController {
     private final EmployeeService employeeService;
 
-    @Autowired
     public EmployeeController(EmployeeService employeeService) {
         this.employeeService = employeeService;
     }
 
-
-    @PostMapping
-    public ResponseEntity<String> addEmployee(@RequestBody Employee employee) {
-        try {
-            employeeService.addEmployee(employee);
-            return ResponseEntity.ok("Сотрудник добавлен.");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @GetMapping("/max-salary")
+    public Employee getEmployeeWithMaxSalary(@RequestParam String departmentId) {
+        return employeeService.getEmployeeWithMaxSalary(departmentId);
     }
 
-
-    @DeleteMapping
-    public ResponseEntity<String> removeEmployee(@RequestParam String name, @RequestParam String surname) {
-        try {
-            employeeService.removeEmployee(name, surname);
-            return ResponseEntity.ok("Сотрудник удален.");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @GetMapping("/min-salary")
+    public Employee getEmployeeWithMinSalary(@RequestParam String departmentId) {
+        return employeeService.getEmployeeWithMinSalary(departmentId);
     }
-
-
-    @GetMapping
-    public ResponseEntity<Employee> findEmployee(@RequestParam String name, @RequestParam String surname) {
-        try {
-            Employee employee = employeeService.findEmployee(name, surname);
-            return ResponseEntity.ok(employee);
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
 
     @GetMapping("/all")
-    public ResponseEntity<Map<String, Employee>> getAllEmployees() {
-        return ResponseEntity.ok(employeeService.getAllEmployees());
+    public List<Employee> getAllEmployeesByDepartment(@RequestParam(required = false) String departmentId) {
+        if (departmentId != null) {
+            return employeeService.getAllEmployeesByDepartment(departmentId);
+        } else {
+            // Если departmentId не указан, возвращаем всех сотрудников, разделённых по отделам
+            Map<String, List<Employee>> employeesByDepartment = employeeService.getAllEmployeesGroupedByDepartment();
+            return employeesByDepartment.values().stream()
+                    .flatMap(List::stream)
+                    .collect(Collectors.toList());
+        }
     }
 }
+
 
 
