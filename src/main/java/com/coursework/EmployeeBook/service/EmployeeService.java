@@ -66,7 +66,6 @@ public class EmployeeService {
                 .filter(e -> e.getDepartmentId().equals(departmentId))
                 .collect(Collectors.toList());
     }
-
     public Map<String, List<Employee>> getAllEmployeesGroupedByDepartment() {
         return employeeMap.values().stream()
                 .collect(Collectors.groupingBy(Employee::getDepartmentId));
