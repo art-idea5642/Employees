@@ -3,7 +3,9 @@ package com.coursework.EmployeeBook.service;
 import com.coursework.EmployeeBook.dto.Employee;
 import com.coursework.EmployeeBook.exceptions.EmployeeAlreadyAddedException;
 import com.coursework.EmployeeBook.exceptions.EmployeeNotFoundException;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,14 +19,32 @@ public class EmployeeService {
     }
 
     public void addEmployee(Employee employee) {
-        String key = generateKey(employee);
+        if (StringUtils.isBlank(employee.getFirstName()) || StringUtils.isBlank(employee.getSurname())) {
+            throw new IllegalArgumentException("Имя и фамилия не могут быть пустыми.");
+        }
+
+        String formattedFirstName = StringUtils.capitalize(employee.getFirstName().toLowerCase());
+        String formattedSurname = StringUtils.capitalize(employee.getSurname().toLowerCase());
+
+        Employee formattedEmployee = new Employee(formattedFirstName, formattedSurname, employee.getSalary(), employee.getDepartmentId());
+
+        String key = generateKey(formattedEmployee);
         if (employeeMap.containsKey(key)) {
             throw new EmployeeAlreadyAddedException("Сотрудник с таким ФИО уже существует.");
         }
-        employeeMap.put(key, employee);
+        employeeMap.put(key, formattedEmployee);
     }
 
+
+
     public void removeEmployee(String name, String surname) {
+        if (StringUtils.isBlank(name) || StringUtils.isBlank(surname)) {
+            throw new IllegalArgumentException("Имя и фамилия не могут быть пустыми.");
+        }
+
+        name = StringUtils.capitalize(name.toLowerCase());
+        surname = StringUtils.capitalize(surname.toLowerCase());
+
         String key = name + " " + surname;
         if (!employeeMap.containsKey(key)) {
             throw new EmployeeNotFoundException("Сотрудник с таким ФИО не найден.");
@@ -32,7 +52,15 @@ public class EmployeeService {
         employeeMap.remove(key);
     }
 
+
     public Employee findEmployee(String name, String surname) {
+        if (StringUtils.isBlank(name) || StringUtils.isBlank(surname)) {
+            throw new IllegalArgumentException("Имя и фамилия не могут быть пустыми.");
+        }
+
+        name = StringUtils.capitalize(name.toLowerCase());
+        surname = StringUtils.capitalize(surname.toLowerCase());
+
         String key = name + " " + surname;
         Employee employee = employeeMap.get(key);
         if (employee == null) {
@@ -40,6 +68,7 @@ public class EmployeeService {
         }
         return employee;
     }
+
 
     public Map<String, Employee> getAllEmployees() {
         return employeeMap;
